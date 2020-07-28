@@ -3,7 +3,7 @@
   "devDependencies": {
     "react-scripts": "latest"
   },
-  "description": "https://github.com/mui-org/material-ui/blob/master/docs/src/pages/components/tabs/ScrollableTabsButtonAuto.js",
+  "description": "edit form",
   "dependencies": {
     "@material-ui/core": "latest",
     "@material-ui/lab": "4.0.0-alpha.56",
