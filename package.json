@@ -5,8 +5,10 @@
   },
   "description": "edit form",
   "dependencies": {
+    "@apollo/react-hooks": "4.0.0",
     "@material-ui/core": "latest",
     "@material-ui/lab": "4.0.0-alpha.56",
+    "graphql": "15.3.0",
     "prop-types": "latest",
     "react": "latest",
     "react-dom": "latest",

@@ -4,7 +4,7 @@ import Autocomplete from "@material-ui/lab/Autocomplete";
 import { Controller } from "react-hook-form";
 
 
-export default function CountrySelect({ onChange, control }) {
+export default function SelectCountry({ onChange, control }) {
   return (
     <Controller
       as={
