@@ -13,6 +13,7 @@ import Box from "@material-ui/core/Box";
 import EditGeneral from "./EditGeneral";
 import EditLocation from "./EditLocation";
 import EditImages from "./EditImages";
+import EditNetworks from "./EditNetworks";
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -77,7 +78,7 @@ export default function ScrollableTabsButtonAuto() {
           <Tab label="general" {...a11yProps(0)} />
           <Tab label="images" {...a11yProps(1)} />
           <Tab label="location " {...a11yProps(2)} />
-          <Tab label="Item Four" {...a11yProps(3)} />
+          <Tab label="networks" {...a11yProps(3)} />
           <Tab label="Item Five" {...a11yProps(4)} />
           <Tab label="Item Six" {...a11yProps(5)} />
           <Tab label="Item Seven" {...a11yProps(6)} />
@@ -93,7 +94,7 @@ export default function ScrollableTabsButtonAuto() {
         <EditLocation entryId={"dummyID"} />
       </TabPanel>
       <TabPanel value={value} index={3}>
-        Item Four
+      <EditNetworks entryId={"dummyID"} />
       </TabPanel>
       <TabPanel value={value} index={4}>
         Item Five
