@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { makeStyles } from '@material-ui/core/styles';
 
 import { useForm } from "react-hook-form";
 import MUIDataTable from "mui-datatables";
@@ -9,8 +10,6 @@ import FormHelperText from "@material-ui/core/FormHelperText";
 import FormControl from "@material-ui/core/FormControl";
 import Select from "@material-ui/core/Select";
 
-import Fab from "@material-ui/core/Fab";
-import AddIcon from "@material-ui/icons/Add";
 
 import { useQuery } from "@apollo/react-hooks";
 
@@ -18,15 +17,73 @@ import { useQuery } from "@apollo/react-hooks";
 import Grid from "@material-ui/core/Grid";
 import Button from "@material-ui/core/Button";
 
+
+import TableRow from "@material-ui/core/TableRow";
+import TableCell from "@material-ui/core/TableCell";
+
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
+
+
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    flexGrow: 1,
+  },
+  fab: {
+    position: 'absolute',
+    bottom: theme.spacing(2),
+    right: theme.spacing(2),
+  },
+}));
+
+
 export default function EditNetworks({ entryId }) {
-  const [responsive, setResponsive] = useState("vertical");
-  const [tableBodyHeight, setTableBodyHeight] = useState("400px");
-  const [tableBodyMaxHeight, setTableBodyMaxHeight] = useState("");
+  //const [responsive, setResponsive] = useState("vertical");
+  //const [tableBodyHeight, setTableBodyHeight] = useState("400px");
+  //const [tableBodyMaxHeight, setTableBodyMaxHeight] = useState("");
+  
+  const classes = useStyles();
+
+
+// edit function start
+const [open, setOpen] = React.useState(false);
+const [scroll, setScroll] = React.useState('paper');
+
+const handleClickOpen = () => {
+  setOpen(true);
+  setScroll("paper");
+};
+
+const handleClose = () => {
+  setOpen(false);
+};
+
+function handleActionButton(action, dataIndex, rowIndex ) {
+  console.log("action", action, " dataIndex=", dataIndex, " rowIndex=", rowIndex);
+  setOpen(true);
+  setScroll("paper");
+
+
+}
+
+
+// edit function end
 
   const columns = [
     {
-      name: "id",
-      label: "id",
+      name: "networkId",
+      label: "networkId",
+      options: {
+        display: false
+      }
+    },
+    {
+      name: "netMemberId",
+      label: "netMemberId",
       options: {
         display: false
       }
@@ -37,30 +94,14 @@ export default function EditNetworks({ entryId }) {
       options: {
         filter: true,
         sort: true,
-        customBodyRenderLite: dataIndex => {
-          let val = "Applied";
-          if (
-            this.state.data[dataIndex].approved === true &&
-            this.state.data[dataIndex].resigned !== true
-          ) {
-            val = "Active";
-          } else if (this.state.data[dataIndex].resigned === true) {
-            val = "Resigned";
-          }
-          return val;
-        }
       }
     },
     {
-      name: "displayName",
+      name: "networkDisplayName",
       label: "Network",
       options: {
         filter: true,
         sort: true,
-        customBodyRenderLite: dataIndex => {
-          let val = this.state.data[dataIndex].network.displayName;
-          return val;
-        }
       }
     },
     {
@@ -70,14 +111,20 @@ export default function EditNetworks({ entryId }) {
         filter: true,
         sort: true,
         customBodyRenderLite: dataIndex => {
-          let val = this.state.data[dataIndex].appliedDate;
-          if (
-            this.state.data[dataIndex].approved === true &&
-            this.state.data[dataIndex].resigned !== true
-          ) {
-            val = this.state.data[dataIndex].approvedDate;
-          } else if (this.state.data[dataIndex].resigned === true) {
-            val = this.state.data[dataIndex].resignedDate;
+          let val = "udef";
+          switch(this.state.data[dataIndex].status) {
+            case "Applied":
+                val = this.state.data[dataIndex].appliedDate;
+                break;            
+            case "Member":
+                val = this.state.data[dataIndex].approvedDate;
+                break;
+            case "Resigned":   
+              val = this.state.data[dataIndex].resignedDate;
+              break;
+          default:
+              val = "--"
+              break;
           }
           return val;
         }
@@ -90,77 +137,122 @@ export default function EditNetworks({ entryId }) {
         filter: true,
         sort: true,
         customBodyRenderLite: dataIndex => {
-          let val = this.state.data[dataIndex].appliedBy;
-          if (
-            this.state.data[dataIndex].approved === true &&
-            this.state.data[dataIndex].resigned !== true
-          ) {
-            val = this.state.data[dataIndex].approvedBy;
-          } else if (this.state.data[dataIndex].resigned === true) {
-            val = this.state.data[dataIndex].resignedBy;
+          let val = "udef";
+          switch(this.state.data[dataIndex].status) {
+            case "Applied":
+                val = this.state.data[dataIndex].appliedBy;
+                break;            
+            case "Member":
+                val = this.state.data[dataIndex].approvedBy;
+                break;
+            case "Resigned":   
+              val = this.state.data[dataIndex].resignedBy;
+              break;
+          default:
+              val = "--"
+              break;
           }
           return val;
+
         }
       }
     },
     {
-      name: "text",
-      label: "Comment",
+      name: "Action",
       options: {
-        filter: true,
-        sort: true
+        filter: false,
+        sort: false,
+        empty: true,
+        customBodyRenderLite: (dataIndex, rowIndex) => {
+          let val = "udef";
+          switch(this.state.data[dataIndex].status) {
+            case "Applied":
+                val = "Approve"
+                break;            
+            case "Member":
+                val = "Resign"
+                break;
+            case "Resigned":   
+              val = "Reapply";
+              break;
+            default:
+              val = "Apply";
+              break;
+          }
+          //            <button onClick={() => window.alert(`Clicked ${val} for row ${rowIndex} with dataIndex of ${dataIndex} `)}>
+          //handleActionButton(val, dataIndex, rowIndex ) 
+          return (
+            <button onClick={() => handleActionButton(val, dataIndex, rowIndex ) }>
+              {val} 
+            </button>
+          );
+        }
       }
     }
+
   ];
 
+//dummy data
   const netMemberOrgs = [
     {
-      id: "5eea060dc0c8c0809b8122af",
-      network: {
-        idName: "sbn",
-        displayName: "Smarte Byer Norge"
-      },
-      approved: true,
-      approvedDate: "2020-07-01",
-      approvedBy: "terje",
-      appliedDate: "2020-06-30",
-      appliedBy: "nk brreg",
-      text: "Net:sbn, Org:bronnoysundregistrene, Source:terje2",
-      resigned: false,
-      resignedDate: null,
-      resignedBy: null
+      "networkId": "5ee213e4a31f1b832b12bc81",
+      "networkIdName": "sbn",
+      "networkDisplayName": "Smarte Byer Norge",
+      "networkSlogan": "Smartbynettverk for alle",
+      "networkUrl": "http://www.smartebyernorge.no",
+      "netMemberId": "5eea060dc0c8c0809b8122af",
+      "status": "Member",
+      "approvedDate": "2020-07-01",
+      "approvedBy": "terje",
+      "appliedDate": "2020-06-30",
+      "appliedBy": "nk brreg",
+      "text": "Net:sbn, Org:bronnoysundregistrene, Source:terje2",
+      "resignedDate": null,
+      "resignedBy": null,
+      "sort": 1
     },
     {
-      id: "5f2168858559cbcdd7ec163f",
-      network: {
-        idName: "cor",
-        displayName: "Core dev network"
-      },
-      approved: false,
-      approvedDate: null,
-      approvedBy: null,
-      appliedDate: "2020-07-01",
-      appliedBy: "terje manuellt",
-      text: "brreg to cor network",
-      resigned: false,
-      resignedDate: null,
-      resignedBy: null
+      "networkId": "5ee2198da31f1b832b12bca2",
+      "networkIdName": "cor",
+      "networkDisplayName": "Core dev network",
+      "networkSlogan":  "demo development network",
+      "networkUrl": "http://www.norkor.no",
+      "netMemberId": "5f2168858559cbcdd7ec163f",
+      "status": "Applied",
+      "approvedDate": null,
+      "approvedBy": null,
+      "appliedDate": "2020-07-01",
+      "appliedBy": "terje manuellt",
+      "text": "brreg to cor network",
+      "resignedDate": null,
+      "resignedBy": null,
+      "sort": 2
     },
     {
-      id: "5f216aca8559cbcdd7ec1640",
-      network: {
-        idName: "gba",
-        displayName: "Grønn Byggallianse"
-      },
-      approved: true,
-      approvedDate: "2020-07-01",
-      approvedBy: "godkjennt av ter",
-      appliedDate: "2020-04-01",
-      appliedBy: "terje i strapi søkte",
-      text: "brreg to green",
-      resigned: true,
-      resignedDate: "2020-07-28",
-      resignedBy: "utmelt  av ter"
+      "networkId": "5ee23ee289a7d3095dfad68b",
+      "networkIdName": "gba",
+      "networkDisplayName": "Grønn Byggallianse",
+      "networkSlogan": "Vi jobber for bærekraft som det selvfølgelige valget",
+      "networkUrl": "https://byggalliansen.no/",
+      "netMemberId": "5f216aca8559cbcdd7ec1640",
+      "status": "Resigned",
+      "approvedDate": "2020-07-01",
+      "approvedBy": "godkjennt av ter",
+      "appliedDate": "2020-04-01",
+      "appliedBy": "terje i strapi søkte",
+      "text": "brreg to green",
+      "resignedDate": "2020-07-28",
+      "resignedBy": "utmelt  av ter",
+      "sort": 3
+    },
+    {
+      "networkId": "5f2185328559cbcdd7ec1641",
+      "networkIdName": "kystrv",
+      "networkDisplayName": "Kystriksveien",
+      "networkSlogan": "Verdens vakreste reiserute",
+      "networkUrl": "https://www.kystriksveien.no/",
+      "status": "can apply",
+      "sort": 4
     }
   ];
 
@@ -168,10 +260,13 @@ export default function EditNetworks({ entryId }) {
     data: netMemberOrgs
   };
 
+
   const options = {
-    onRowClick: rowData => console.log(rowData),
-    //onRowClick: (data) => this.props.history.push('/adm/edit', 'data'),
-    // onRowClick: (rowData) => history.push('/adm/edit'),
+    sortOrder: {
+      name: 'sort',
+      direction: 'asc'
+    }, 
+
     download: false,
     filter: false,
     pagination: false,
@@ -179,20 +274,69 @@ export default function EditNetworks({ entryId }) {
     search: false,
     viewColumns: false,
     selectableRows: "none",
-    responsive:"standard"
+    responsive:"standard",
+    expandableRows: true,
+    expandableRowsHeader: false,
+    expandableRowsOnClick: true,
+    isRowExpandable: (dataIndex, expandedRows) => {
+      // Prevent expand/collapse of any row if there are 4 rows expanded already (but allow those already expanded to be collapsed)
+      if (expandedRows.data.length > 4 && expandedRows.data.filter(d => d.dataIndex === dataIndex).length === 0) return false;
+      return true;
+    },
+    renderExpandableRow: (rowData, rowMeta) => {
+      const colSpan = rowData.length + 1;
+      return (
+        <TableRow>
+          <TableCell colSpan={colSpan}>
+          <a target="_blank" href={this.state.data[rowMeta.dataIndex].networkUrl}>{this.state.data[rowMeta.dataIndex].networkDisplayName}</a> Slogan :
+            {this.state.data[rowMeta.dataIndex].networkSlogan}<br/>
+            Applied : {this.state.data[rowMeta.dataIndex].appliedDate} by: {this.state.data[rowMeta.dataIndex].appliedBy} <br/>
+            Approved: {this.state.data[rowMeta.dataIndex].approvedDate} by: {this.state.data[rowMeta.dataIndex].approvedBy} <br/>
+            Resigned: {this.state.data[rowMeta.dataIndex].resignedDate} by: {this.state.data[rowMeta.dataIndex].resignedBy} <br/>
+            Comment : {this.state.data[rowMeta.dataIndex].text}            
+          </TableCell>
+        </TableRow>
+      );
+    }
+      
   };
 
+
+
   return (
-    <Grid Container>
+    <div className={classes.root}>
+    
       <MUIDataTable
-        title={"Networks"}
+        title={"Network membership"}
         data={netMemberOrgs}
         columns={columns}
         options={options}
       />
-      <Fab color="primary" aria-label="add">
-        <AddIcon />
-      </Fab>
-    </Grid>
+
+    
+
+    <Dialog 
+        fullWidth = "true" 
+        open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
+        <DialogTitle id="form-dialog-title">Edit</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            You can edit the net
+          </DialogContentText>
+
+
+         hei er
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleClose} color="primary">
+            close
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+
+
+
+    </div>
   );
 }
