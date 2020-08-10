@@ -53,10 +53,6 @@ export default function EntityEditNetworkMembership({ entryId }) {
 const [open, setOpen] = React.useState(false);
 const [scroll, setScroll] = React.useState('paper');
 
-const handleClickOpen = () => {
-  setOpen(true);
-  setScroll("paper");
-};
 
 const handleClose = () => {
   setOpen(false);
@@ -175,9 +171,6 @@ function handleActionButton(action, dataIndex, rowIndex ) {
             case "Resigned":   
               val = "Reapply";
               break;
-            case "Invited":   
-              val = "Accept invite";
-              break;
             default:
               val = "Apply";
               break;
@@ -196,7 +189,7 @@ function handleActionButton(action, dataIndex, rowIndex ) {
   ];
 
 //dummy data
-  const netMemberOrgs = [
+  const entityCategoryAnswers = [
     {
       "networkId": "5ee213e4a31f1b832b12bc81",
       "networkIdName": "sbn",
@@ -254,7 +247,7 @@ function handleActionButton(action, dataIndex, rowIndex ) {
       "networkDisplayName": "Kystriksveien",
       "networkSlogan": "Verdens vakreste reiserute",
       "networkUrl": "https://www.kystriksveien.no/",
-      "status": "can apply",
+      "status": "Can apply",
       "sort": 5
     },
     {
@@ -269,7 +262,7 @@ function handleActionButton(action, dataIndex, rowIndex ) {
   ];
 
   this.state = {
-    data: netMemberOrgs
+    data: entityCategoryAnswers
   };
 
 
@@ -352,47 +345,3 @@ function handleActionButton(action, dataIndex, rowIndex ) {
     </div>
   );
 }
-/*** The data must be fetched  */
-
-/*
-
-
-query getNetworksAndMembers ($organizationID: ID!){
-  networks {
-    id
-    idName
-    displayName
-    slogan
-    url
-    summary
-    
-
-  }
-      netMemberOrgs (where: 
-                    {
-                        organization: $organizationID
-                    }
-  								) 
-  {
-      id
-    network {
-      id
-      idName
-      displayName
-      slogan
-    }
-    
-    status
-    approvedDate
-    approvedBy
-    appliedDate
-    appliedBy
-    text
-    resignedDate
-    resignedBy
-  }
-  
-}
-
-
-*/
