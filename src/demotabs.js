@@ -82,7 +82,7 @@ export default function ScrollableTabsButtonAuto() {
           <Tab label="location " {...a11yProps(2)} />
           <Tab label="networks" {...a11yProps(3)} />
           <Tab label="CategoryItemList" {...a11yProps(4)} />
-          <Tab label="CategoryItemListMultiple" {...a11yProps(5)} />
+          <Tab label="CategoryItemListMultiple-" {...a11yProps(5)} />
           <Tab label="Item Seven" {...a11yProps(6)} />
         </Tabs>
       </AppBar>

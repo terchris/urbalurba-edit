@@ -1,5 +1,5 @@
 import React from "react";
-import { makeStyles } from "@material-ui/core/styles";
+
 import List from "@material-ui/core/List";
 
 import Typography from "@material-ui/core/Typography";
@@ -7,13 +7,6 @@ import CategoryItemListItemMultiple from "./CategoryItemListItemMultiple";
 
 import CategoryItemListItem from "./CategoryItemListItem";
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    width: "100%",
-    maxWidth: 360,
-    backgroundColor: theme.palette.background.paper
-  }
-}));
 
 var data = {
   categories: [
@@ -129,7 +122,7 @@ var data = {
 };
 
 export default function CategoryItemList() {
-  const classes = useStyles();
+  
   const [checked, setChecked] = React.useState([1]);
 
   const handleToggle = (value) => () => {
