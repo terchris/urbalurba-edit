@@ -74,3 +74,66 @@ export default function AnswerEditSingle({ answerArray }) {
     </Grid>
   );
 }
+
+
+/*
+query categoryAnswersEntityAnswer ($categoryIdName: String!, $entityIdName: String!){
+  categories(where: {
+    idName: $categoryIdName
+  }) {
+    id
+    idName
+    displayName
+    summary
+    categoryType
+    internalImage {
+      icon {
+        url
+      }
+    }
+    categoryitems {
+      id
+      idName
+      displayName
+      summary
+      description
+      internalImage {
+        icon {
+          url
+        }
+      }
+    }    
+  }
+entityCategoryAnswers 
+  (where: 
+  	{
+  		entity_category: {
+    		category: {
+  				idName: $categoryIdName 
+  			}
+        entity: {
+        	idName: $entityIdName
+      	}
+  		}
+      
+		}
+    ){
+    id
+    text
+    entity_category {
+      id
+      category {
+        idName
+      }  
+    }
+  categoryitem {
+    id
+    idName
+    
+  }
+  }
+
+}
+
+  
+*/
