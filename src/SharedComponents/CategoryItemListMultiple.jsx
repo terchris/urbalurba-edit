@@ -334,7 +334,9 @@ function readDefaultValues(
 ) {
   let newEntityCategoryRecord = {
     action: "dont know", // "not selected", "create", "delete" or "update"
-    entityCategoryID: "need to find it", //if the usr has answers in the category it must be created. otherwise we find it on one of the entityCategoryAnswers
+    entityCategoryID: "dont know", //if the usr has answers in the category it must be created. otherwise we find it on one of the entityCategoryAnswers
+    categoryID: categoryID,
+    entityID: "needed if action is CREATE",
     text: "what to write here",
     entityCategoryAnswers: []
   };
@@ -451,13 +453,14 @@ function readDefaultValues(
   );
   console.log("deleted:", JSON.stringify(deleted));
 
-  if (unchanged) {
-    // there are answers that are unchanged
+  if (unchanged || created  ) {
+    // there are answers that are unchanged or created
     newEntityCategoryRecord.action = "unchanged"; //then we can keep the record. no matter if thee are created and deleted answers
   }
 
   if (!unchanged && created && !deleted) {
     newEntityCategoryRecord.action = "CREATE"; // we have at least one new answer -> then we must create the record
+    newEntityCategoryRecord.entityCategoryID = "to be created"; // database will give us this when the record is created
   }
 
   if (!unchanged && !created && deleted) {
@@ -466,6 +469,7 @@ function readDefaultValues(
 
   if (!unchanged && !created && !deleted) {
     newEntityCategoryRecord.action = "not selected"; // nothing changed, created or deleted - that means that nothing is selected
+    newEntityCategoryRecord.entityCategoryID = "not relevant"; // database will give us this when the record is created
   }
 
   return newEntityCategoryRecord;
@@ -474,6 +478,7 @@ function readDefaultValues(
 export default function CategoryItemListMultiple() {
   var category = dummyData.categories[0];
   var entityCategoryAnswers = dummyData.entityCategoryAnswers;
+  //entityCategoryAnswers = []; //teting with no elected
 
   defaultValues = setDefaultValues(
     category.categoryitems,
@@ -552,32 +557,3 @@ export default function CategoryItemListMultiple() {
     </form>
   );
 }
-
-/* ver 5.5.1
-                  <ListItemSecondaryAction>
-                    <Controller
-                      as={Checkbox}
-                      name={`${currentCategory.idName}`}
-                      type="checkbox"
-                      control={control}
-                    />
-                  </ListItemSecondaryAction>
-
-*/
-
-/* ver 6.5.1
-<ListItemSecondaryAction>
-        <Controller
-          name={`${currentCategory.idName}`}
-          control={control}
-          render={(props) => (
-            <Checkbox
-              onChange={(e) => props.onChange(e.target.checked)}
-              checked={props.value}
-            />
-          )}
-        />
-</ListItemSecondaryAction>
-
-
-*/
