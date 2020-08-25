@@ -4,6 +4,7 @@ import { useForm, Controller } from "react-hook-form";
 
 import { makeStyles } from "@material-ui/core/styles";
 import Checkbox from "@material-ui/core/Checkbox";
+import TextField from "@material-ui/core/TextField";
 import Typography from "@material-ui/core/Typography";
 import Button from "@material-ui/core/Button";
 import List from "@material-ui/core/List";
@@ -254,6 +255,9 @@ var dummyData = {
       categoryitem: {
         id: "5f325891203f6aa19031fe92",
         idName: "mobility"
+      },
+      entity_category: {
+        id: "5f325a0f203f6aa1903207f0"
       }
     },
     {
@@ -262,6 +266,9 @@ var dummyData = {
       categoryitem: {
         id: "5f325891203f6aa19031feb3",
         idName: "telecom-and-software"
+      },
+      entity_category: {
+        id: "5f325a0f203f6aa1903207f0"
       }
     }
   ]
@@ -275,21 +282,25 @@ var dummyData = {
   water: false
 }
 */
-function setDefaultValues(categoryitems, categoryAnswers) {
+function setDefaultValues(categoryitems, entityCategoryAnswers) {
   let newDefaultValues = {};
 
   for (let i = 0; i < categoryitems.length; i++) {
-    let found = categoryAnswers.find(
+    let found = entityCategoryAnswers.find(
       (item) => item.categoryitem.idName === categoryitems[i].idName
     );
-    if (found) newDefaultValues[categoryitems[i].idName] = true;
-    else newDefaultValues[categoryitems[i].idName] = false;
+    if (found) {
+      newDefaultValues[categoryitems[i].idName] = true;
+      let textAttribute = found.categoryitem.idName + "-text";
+      newDefaultValues[textAttribute] = found.text;
+      //console.log("textAttribute: ", textAttribute, "newDefaultValues[textAttribute]",newDefaultValues[textAttribute] );
+    } else newDefaultValues[categoryitems[i].idName] = false;
   }
   return newDefaultValues;
 }
 
 /*** setDefaultValues
- * takes the full list of possible answers (categoryitems) and the list of ansers that was there before they was displayo n the screen (categoryAnswers) 
+ * takes the full list of possible answers (categoryitems) and the list of ansers that was there before they was displayo n the screen (entityCategoryAnswers) 
  * the object inputAnswers contains the answers after the user has changed some of them.
  * This function figures out what has changed and returns an array of objects that is marked 
  * updated, deleted, added for each of the possible answers
@@ -317,18 +328,26 @@ idName: "mobility", //just for debugging
 */
 function readDefaultValues(
   categoryID,
-  entityCategoryID,
   categoryitems,
-  categoryAnswers,
+  entityCategoryAnswers,
   inputAnswers
 ) {
-  let newCategoryAnswer = {
-    action: "dont know", // "unchanged", "create", "delete" or "update"
-    entityCategoryID: entityCategoryID, //if the usr has answers in the category
-    idName: "i dont have it", //just for debugging
+  let newEntityCategoryRecord = {
+    action: "dont know", // "not selected", "create", "delete" or "update"
+    entityCategoryID: "need to find it", //if the usr has answers in the category it must be created. otherwise we find it on one of the entityCategoryAnswers
     text: "what to write here",
-    newEntityCategoryAnswers: []
+    entityCategoryAnswers: []
   };
+  // if the entity already has one or more answers in this category. then there is a entityCategory record
+  // we look at the first answer (entityCategoryAnswers) that was there before editing to find the id of the entityCategory record
+  if (entityCategoryAnswers) {
+    //if there are answers
+    if (entityCategoryAnswers.length > 0) {
+      // there are at least one answer
+      newEntityCategoryRecord.entityCategoryID =
+        entityCategoryAnswers[0].entity_category.id;
+    }
+  }
 
   let newEntityCategoryAnswerRecord = {};
 
@@ -340,46 +359,116 @@ function readDefaultValues(
       text: "dont know",
       entityCategoryAnswerID: "dont know", //for existing answers a ID for new its empty
       categoryID: "dont know", //if the usr has answers in the category
-      categoryitemID: "dont know"
+      categoryitemID: "dont know",
+      entityCategoryID: newEntityCategoryRecord.entityCategoryID
     };
 
-    let alreadyChecked = categoryAnswers.find(
+    // first figure out if this answer was already in the database before we enabeled editing
+    let alreadyChecked = entityCategoryAnswers.find(
       (item) => item.categoryitem.idName === categoryitems[i].idName
     );
 
-    if (categoryitems[i].idName === inputAnswers[categoryitems[i].idName]) {
-      // if the checkbox is checked
+    // if the entity already has one or more answers in this category. then there is a entityCategory record
+    //
 
-      //OK it is checked. Now lets figure out if it already was checked or if it is a new checked item
-      if (alreadyChecked) { // yes - it was already checked
-        newEntityCategoryAnswerRecord.action = "unchanged";
-        newEntityCategoryAnswerRecord.entityCategoryAnswerID = alreadyChecked.id; //for existing answers a ID for new its empty
-        newEntityCategoryAnswerRecord.text = alreadyChecked.text; //this has no been changed in this input        
-        newEntityCategoryAnswerRecord.categoryID = categoryID; //if the usr has answers in the category
-        newEntityCategoryAnswerRecord.categoryitemID = alreadyChecked.categoryitem.id;
-        newEntityCategoryAnswerRecord.idName = alreadyChecked.categoryitem.idName;        
-      } else {
-        newEntityCategoryAnswerRecord.action = "create";
-        newEntityCategoryAnswerRecord.entityCategoryAnswerID = "to be created"; //for existing answers a ID for new its empty
-        newEntityCategoryAnswerRecord.text = "added by USER "; //TODO: find better debugging txt
-        newEntityCategoryAnswerRecord.categoryID = categoryID; //if the usr has answers in the category
-        newEntityCategoryAnswerRecord.categoryitemID = categoryitems[i].id;
-        newEntityCategoryAnswerRecord.idName = categoryitems[i].idName;
-      }
-    } else {
-      // it is not checked. if it was checked before we need to delete that record
-      if (alreadyChecked) { // yes - it was already checked
-        newEntityCategoryAnswerRecord.action = "delete";
-        newEntityCategoryAnswerRecord.entityCategoryAnswerID = alreadyChecked.id; //for existing answers a ID for new its empty
-        newEntityCategoryAnswerRecord.text = alreadyChecked.text; //this has no been changed in this input        
-        newEntityCategoryAnswerRecord.categoryID = categoryID; //if the usr has answers in the category
-        newEntityCategoryAnswerRecord.categoryitemID = alreadyChecked.categoryitem.id;
-        newEntityCategoryAnswerRecord.idName = alreadyChecked.categoryitem.idName;        
-      } else {
-        // it was not checked and it is not checked now. so we will do nothing
-      }
+    //console.log("idName:", categoryitems[i].idName);
+    if (alreadyChecked)
+      console.log("idName:", categoryitems[i].idName, " alreadyChecked: TRUE");
+    else
+      console.log("idName:", categoryitems[i].idName, " alreadyChecked: FALSE");
+    console.log(
+      "inputAnswers[categoryitems[i].idName]:",
+      inputAnswers[categoryitems[i].idName]
+    );
+
+    if (inputAnswers[categoryitems[i].idName] && alreadyChecked) {
+      // if the checkbox is checked and it was checked before editing
+      console.log("idName:", categoryitems[i].idName, " ACTION unchanged");
+      newEntityCategoryAnswerRecord.action = "unchanged";
+      newEntityCategoryAnswerRecord.entityCategoryAnswerID = alreadyChecked.id; //for existing answers a ID for new its empty
+      newEntityCategoryAnswerRecord.text = alreadyChecked.text; //this has no been changed in this input
+      newEntityCategoryAnswerRecord.categoryID = categoryID; //if the usr has answers in the category
+      newEntityCategoryAnswerRecord.categoryitemID =
+        alreadyChecked.categoryitem.id;
+      newEntityCategoryAnswerRecord.idName = alreadyChecked.categoryitem.idName;
     }
-  return newDefaultValues;
+
+    if (inputAnswers[categoryitems[i].idName] && !alreadyChecked) {
+      // if the checkbox is checked and it was NOT checked before editing
+      console.log("idName:", categoryitems[i].idName, " ACTION create");
+      newEntityCategoryAnswerRecord.action = "CREATE";
+      newEntityCategoryAnswerRecord.entityCategoryAnswerID = "to be created"; //for existing answers a ID for new its empty
+      newEntityCategoryAnswerRecord.text = "added by USER "; //TODO: find better debugging txt
+      newEntityCategoryAnswerRecord.categoryID = categoryID; //if the usr has answers in the category
+      newEntityCategoryAnswerRecord.categoryitemID = categoryitems[i].id;
+      newEntityCategoryAnswerRecord.idName = categoryitems[i].idName;
+    }
+    if (!inputAnswers[categoryitems[i].idName] && alreadyChecked) {
+      // it is not checked. if it was checked before we need to delete that record
+      console.log("idName:", categoryitems[i].idName, " ACTION delete");
+      newEntityCategoryAnswerRecord.action = "DELETE";
+      newEntityCategoryAnswerRecord.entityCategoryAnswerID = alreadyChecked.id; //for existing answers a ID for new its empty
+      newEntityCategoryAnswerRecord.text = alreadyChecked.text; //this has no been changed in this input
+      newEntityCategoryAnswerRecord.categoryID = categoryID; //if the usr has answers in the category
+      newEntityCategoryAnswerRecord.categoryitemID =
+        alreadyChecked.categoryitem.id;
+      newEntityCategoryAnswerRecord.idName = alreadyChecked.categoryitem.idName;
+    }
+
+    if (!inputAnswers[categoryitems[i].idName] && !alreadyChecked) {
+      // it is not checked. if it was checked before we need to delete that record
+      console.log("idName:", categoryitems[i].idName, " ACTION not selected");
+      newEntityCategoryAnswerRecord.action = "not selected";
+      newEntityCategoryAnswerRecord.entityCategoryAnswerID = "not selected";
+      newEntityCategoryAnswerRecord.text = "not selected";
+      newEntityCategoryAnswerRecord.categoryID = categoryID; //if the usr has answers in the category
+      newEntityCategoryAnswerRecord.categoryitemID = categoryitems[i].id;
+      newEntityCategoryAnswerRecord.idName = categoryitems[i].idName;
+    }
+
+    // now we have the record - lats add it to the array
+    newEntityCategoryRecord.entityCategoryAnswers.push(
+      newEntityCategoryAnswerRecord
+    );
+  } // end loop
+
+  // now we need to fiure out if the relation between the entity and the category (entityCategory) must be CREATED, DELETED or is unchanged
+  // if there was no entityCategoryAnswers and there now are one or more then a entityCategory must be CREATED first in order to add entityCategoryAnswers
+  // if there was entityCategoryAnswers and there now are NONE then the entityCategory must be DELETED after deleting all entityCategoryAnswers
+
+  let unchanged = newEntityCategoryRecord.entityCategoryAnswers.find(
+    (item) => item.action === "unchanged"
+  );
+  console.log("unchanged:", JSON.stringify(unchanged));
+
+  let created = newEntityCategoryRecord.entityCategoryAnswers.find(
+    (item) => item.action === "CREATE"
+  );
+  console.log("created:", JSON.stringify(created));
+
+  let deleted = newEntityCategoryRecord.entityCategoryAnswers.find(
+    (item) => item.action === "DELETE"
+  );
+  console.log("deleted:", JSON.stringify(deleted));
+
+  if (unchanged) {
+    // there are answers that are unchanged
+    newEntityCategoryRecord.action = "unchanged"; //then we can keep the record. no matter if thee are created and deleted answers
+  }
+
+  if (!unchanged && created && !deleted) {
+    newEntityCategoryRecord.action = "CREATE"; // we have at least one new answer -> then we must create the record
+  }
+
+  if (!unchanged && !created && deleted) {
+    newEntityCategoryRecord.action = "DELETE"; // no unchanged and no created answers, but at least one deleted. It means that there are no answers. so we must delete
+  }
+
+  if (!unchanged && !created && !deleted) {
+    newEntityCategoryRecord.action = "not selected"; // nothing changed, created or deleted - that means that nothing is selected
+  }
+
+  return newEntityCategoryRecord;
 }
 
 export default function CategoryItemListMultiple() {
@@ -391,13 +480,24 @@ export default function CategoryItemListMultiple() {
     entityCategoryAnswers
   );
 
+  //console.log("defaultValues:", JSON.stringify(defaultValues));
+
   const { handleSubmit, control } = useForm({ defaultValues });
   //const [data, setData] = useState(null);
 
   const classes = useStyles();
 
   const onSubmit = async (data) => {
-    console.log(data);
+    let newRecord = {};
+    newRecord = readDefaultValues(
+      category.id,
+      category.categoryitems,
+      entityCategoryAnswers,
+      data
+    );
+
+    //console.log("data:", JSON.stringify(data));
+    console.log("newRecord:", JSON.stringify(newRecord, null, 2));
   };
 
   return (
@@ -408,7 +508,6 @@ export default function CategoryItemListMultiple() {
           <Typography variant="h2">{category.summary}</Typography>
           <Typography variant="h3">{category.categoryType}</Typography>
 
-          <label>MUI Checkbox NOW9!!!</label>
           <List dense className={classes.root}>
             {category.categoryitems.map((currentCategory) => {
               return (
@@ -424,12 +523,17 @@ export default function CategoryItemListMultiple() {
                     primary={currentCategory.displayName}
                     secondary={currentCategory.summary}
                   />
+
                   <ListItemSecondaryAction>
                     <Controller
-                      as={Checkbox}
                       name={`${currentCategory.idName}`}
-                      type="checkbox"
                       control={control}
+                      render={(props) => (
+                        <Checkbox
+                          onChange={(e) => props.onChange(e.target.checked)}
+                          checked={props.value}
+                        />
+                      )}
                     />
                   </ListItemSecondaryAction>
                 </ListItem>
@@ -448,3 +552,32 @@ export default function CategoryItemListMultiple() {
     </form>
   );
 }
+
+/* ver 5.5.1
+                  <ListItemSecondaryAction>
+                    <Controller
+                      as={Checkbox}
+                      name={`${currentCategory.idName}`}
+                      type="checkbox"
+                      control={control}
+                    />
+                  </ListItemSecondaryAction>
+
+*/
+
+/* ver 6.5.1
+<ListItemSecondaryAction>
+        <Controller
+          name={`${currentCategory.idName}`}
+          control={control}
+          render={(props) => (
+            <Checkbox
+              onChange={(e) => props.onChange(e.target.checked)}
+              checked={props.value}
+            />
+          )}
+        />
+</ListItemSecondaryAction>
+
+
+*/

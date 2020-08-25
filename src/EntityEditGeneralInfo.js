@@ -1,6 +1,6 @@
 import React from "react";
 import { useForm } from "react-hook-form";
-import { useQuery } from "@apollo/react-hooks";
+
 
 // @material-ui/core components
 import Grid from "@material-ui/core/Grid";
@@ -41,7 +41,7 @@ export default function EntityEditGeneralInfo({ entryId }) {
   };
 
   return (
-    <Grid Container>
+    <Grid container>
       <h1>Gereral fields (EntityEditGeneralInfo)</h1>
           <form>
             <Grid container spacing={3}>

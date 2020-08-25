@@ -14,7 +14,7 @@
     "prop-types": "latest",
     "react": "16.13.1",
     "react-dom": "16.13.1",
-    "react-hook-form": "5.5.1"
+    "react-hook-form": "6.5.0"
   },
   "keywords": [],
   "name": "urbalurba-edit",
