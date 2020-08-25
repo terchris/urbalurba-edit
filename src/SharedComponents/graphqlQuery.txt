@@ -1,0 +1,47 @@
+query categoryAnswersEntityAnswer(
+  $categoryIdName: String!
+  $entityIdName: String!
+) {
+  categories(where: { idName: $categoryIdName }) {
+    id
+    idName
+    displayName
+    summary
+    categoryType
+    internalImage {
+      icon {
+        url
+      }
+    }
+    categoryitems {
+      id
+      idName
+      displayName
+      summary
+      description
+      internalImage {
+        icon {
+          url
+        }
+      }
+    }
+  }
+  entityCategoryAnswers(
+    where: {
+      entity_category: {
+        category: { idName: $categoryIdName }
+        entity: { idName: $entityIdName }
+      }
+    }
+  ) {
+    id
+    text
+    categoryitem {
+      id
+      idName
+    }
+    entity_category {
+      id
+    }
+  }
+}
