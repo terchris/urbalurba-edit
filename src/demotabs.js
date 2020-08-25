@@ -16,6 +16,7 @@ import EntityEditImages from "./EntityEditImages";
 import EntityEditNetworkMembership from "./EntityEditNetworkMembership";
 import CategoryItemList from "./SharedComponents/CategoryItemList";
 import CategoryItemListMultiple from "./SharedComponents/CategoryItemListMultiple";
+import CategoryItemListSingle from "./SharedComponents/CategoryItemListSingle";
 
 function TabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -82,8 +83,8 @@ export default function ScrollableTabsButtonAuto() {
           <Tab label="location " {...a11yProps(2)} />
           <Tab label="networks" {...a11yProps(3)} />
           <Tab label="CategoryItemList" {...a11yProps(4)} />
-          <Tab label="CategoryItemListMultiple-" {...a11yProps(5)} />
-          <Tab label="Item Seven" {...a11yProps(6)} />
+          <Tab label="CategoryItemListMultiple" {...a11yProps(5)} />
+          <Tab label="CategoryItemListSingle" {...a11yProps(6)} />
         </Tabs>
       </AppBar>
       <TabPanel value={value} index={0}>
@@ -105,7 +106,7 @@ export default function ScrollableTabsButtonAuto() {
       <CategoryItemListMultiple />
       </TabPanel>
       <TabPanel value={value} index={6}>
-        Item Seven
+      <CategoryItemListSingle />
       </TabPanel>
     </div>
   );
